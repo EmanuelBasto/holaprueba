@@ -4,6 +4,8 @@ import 'package:DONUT_APP_8SC_25_3/tab/pancake_tab.dart';
 import 'package:DONUT_APP_8SC_25_3/tab/pizza_tab.dart';
 import 'package:DONUT_APP_8SC_25_3/tab/smoothie_tab.dart';
 import 'package:DONUT_APP_8SC_25_3/utils/my_tab.dart';
+import 'package:DONUT_APP_8SC_25_3/utils/cart_item.dart';
+import 'package:DONUT_APP_8SC_25_3/utils/cart_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -14,6 +16,44 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  //Estado del carrito
+  List<CartItem> cartItems = [];
+  
+  //Getters para el contador y total
+  int get itemCount => cartItems.fold(0, (sum, item) => sum + item.quantity);
+  double get totalPrice => cartItems.fold(0.0, (sum, item) => sum + (item.price * item.quantity));
+
+  //Función para agregar items al carrito
+  void addToCart(String name, double price, String imagePath) {
+    setState(() {
+      //Buscar si el producto ya está en el carrito
+      final existingItemIndex = cartItems.indexWhere((item) => item.name == name);
+      
+      if (existingItemIndex != -1) {
+        //Si ya existe, incrementar la cantidad
+        cartItems[existingItemIndex].quantity++;
+      } else {
+        //Si no existe, agregarlo
+        cartItems.add(CartItem(
+          name: name,
+          price: price,
+          imagePath: imagePath,
+          quantity: 1,
+        ));
+      }
+    });
+  }
+
+  //Función para mostrar el carrito
+  void showCart() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => CartBottomSheet(cartItems: cartItems),
+    );
+  }
+
   List<Widget> myTabs = [
     //Donut
     const MyTab(iconPath: "lib/icons/donut.png", text: "Donut"),
@@ -72,11 +112,11 @@ class _HomePageState extends State<HomePage> {
             //Contenido de las pestañas (TabBarView)
             Expanded(child: TabBarView(
               children: [
-            DonutTab(),
-            BurgerTab(),
-            SmoothieTab(),
-            PancakeTab(),
-            PizzaTab(),
+            DonutTab(onAddToCart: addToCart),
+            BurgerTab(onAddToCart: addToCart),
+            SmoothieTab(onAddToCart: addToCart),
+            PancakeTab(onAddToCart: addToCart),
+            PizzaTab(onAddToCart: addToCart),
             ],)),
             //Carrrito de compras (Cart)
 
@@ -91,7 +131,7 @@ class _HomePageState extends State<HomePage> {
                     //se pega a la izquierda
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                    Text('2 Items | \$45.00', style: TextStyle(
+                    Text('$itemCount ${itemCount == 1 ? 'Item' : 'Items'} | \$${totalPrice.toStringAsFixed(2)}', style: TextStyle(
                       fontSize: 18, 
                       fontWeight: FontWeight.bold),
                       ),
@@ -108,7 +148,7 @@ class _HomePageState extends State<HomePage> {
                       horizontal: 24,
                     ),
                     ),
-                    onPressed: (){}, 
+                    onPressed: showCart, 
                   child: const Text('View Cart',
                   style: TextStyle(
                     color: Colors.white,

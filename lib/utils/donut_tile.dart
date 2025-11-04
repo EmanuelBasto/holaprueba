@@ -6,8 +6,9 @@ class DonutTile extends StatelessWidget {
   final dynamic donutColor;
   final String donutImagePath;
   final String donutProvider;
+  final Function(String, double, String) onAddToCart;
 
-  const DonutTile ({super.key, required this.donutFlavor, required this.donutPrice, required this.donutColor, required this.donutImagePath, required this.donutProvider});
+  const DonutTile ({super.key, required this.donutFlavor, required this.donutPrice, required this.donutColor, required this.donutImagePath, required this.donutProvider, required this.onAddToCart});
 
   @override
   Widget build(BuildContext context) {
@@ -45,10 +46,15 @@ class DonutTile extends StatelessWidget {
               ],
             ),
                 //imagen del donut
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 18),
-              child: Image.asset(donutImagePath),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 18),
+                child: Image.asset(
+                  donutImagePath,
+                  fit: BoxFit.contain,
+                ),
               ),
+            ),
                 //Nombre del donut
             Text(
               donutFlavor, 
@@ -67,7 +73,9 @@ class DonutTile extends StatelessWidget {
                       color: Colors.red   
                       ),
                     //agregar
-                    TextButton(onPressed: (){}, 
+                    TextButton(onPressed: (){
+                      onAddToCart(donutFlavor, double.parse(donutPrice), donutImagePath);
+                    }, 
                     child: Text(
                       'Add',
                       style: TextStyle(
